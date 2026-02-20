@@ -15,9 +15,10 @@ type HttpService struct {
 	server  *http.Server
 }
 
-func NewServer(cfg *ServerConfig, usersServicePort ports.UsersServicePort) ports.InfrastructureService {
+func NewServer(cfg *ServerConfig, usersServicePort ports.UsersServicePort, filesServicePort ports.FilesServicePort) ports.InfrastructureService {
 	router := NewRouter(Deps{
 		UsersServicePort: usersServicePort,
+		FilesServicePort: filesServicePort,
 	})
 	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 

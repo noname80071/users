@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createUser = `-- name: CreateUser :many
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     username, 
     email, 
@@ -38,8 +38,8 @@ type CreateUserParams struct {
 	IsActive     bool
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, createUser,
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Username,
 		arg.Email,
 		arg.PasswordHash,
@@ -49,25 +49,12 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) ([]uuid.
 		arg.RegisteredAt,
 		arg.IsActive,
 	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		items = append(items, id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const getUserByID = `-- name: GetUserByID :one
 SELECT 
     username,
     email,
@@ -78,9 +65,10 @@ SELECT
     is_active
 FROM users
 WHERE id = $1
+LIMIT 1
 `
 
-type GetUserByIdRow struct {
+type GetUserByIDRow struct {
 	Username     string
 	Email        string
 	Avatar       string
@@ -90,9 +78,9 @@ type GetUserByIdRow struct {
 	IsActive     bool
 }
 
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
-	row := q.db.QueryRow(ctx, getUserById, id)
-	var i GetUserByIdRow
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i GetUserByIDRow
 	err := row.Scan(
 		&i.Username,
 		&i.Email,
@@ -103,4 +91,36 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow
 		&i.IsActive,
 	)
 	return i, err
+}
+
+const updateUserCloak = `-- name: UpdateUserCloak :exec
+UPDATE users 
+SET cloak = $1 
+WHERE id = $2
+`
+
+type UpdateUserCloakParams struct {
+	Cloak pgtype.Text
+	ID    uuid.UUID
+}
+
+func (q *Queries) UpdateUserCloak(ctx context.Context, arg UpdateUserCloakParams) error {
+	_, err := q.db.Exec(ctx, updateUserCloak, arg.Cloak, arg.ID)
+	return err
+}
+
+const updateUserSkin = `-- name: UpdateUserSkin :exec
+UPDATE users 
+SET skin = $1 
+WHERE id = $2
+`
+
+type UpdateUserSkinParams struct {
+	Skin pgtype.Text
+	ID   uuid.UUID
+}
+
+func (q *Queries) UpdateUserSkin(ctx context.Context, arg UpdateUserSkinParams) error {
+	_, err := q.db.Exec(ctx, updateUserSkin, arg.Skin, arg.ID)
+	return err
 }

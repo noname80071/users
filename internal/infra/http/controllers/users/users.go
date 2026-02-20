@@ -3,6 +3,8 @@
 package users
 
 import (
+	"errors"
+	serviceErrors "go-users/errors"
 	"go-users/internal/domain/ports"
 	"net/http"
 
@@ -17,22 +19,28 @@ func NewHandler(service ports.UsersServicePort) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) GetUserById(c *gin.Context) {
-	userId := c.Param("id")
+func (h *Handler) GetUserByID(c *gin.Context) {
+	userID := c.Param("id")
 
-	user, err := h.service.GetUserById(c.Request.Context(), userId)
+	user, err := h.service.GetUserByID(c.Request.Context(), userID)
 
 	if err != nil {
+		switch {
+		case errors.Is(err, serviceErrors.ErrUserNotFound):
+			c.JSON(http.StatusNotFound, "User not found")
+		}
+
 		return
+
 	}
 
 	response := UsersGetByIdResponse{
 		Username:     user.Username,
 		Email:        user.Email,
 		Avatar:       user.Avatar,
-		Skin:         user.Skin.String,
-		Cloak:        user.Cloak.String,
-		RegisteredAt: user.RegisteredAt.Time,
+		Skin:         user.Skin,
+		Cloak:        user.Cloak,
+		RegisteredAt: user.RegisteredAt,
 		IsActive:     user.IsActive,
 	}
 
@@ -47,15 +55,15 @@ func (h *Handler) UserRegister(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
 
-	err := h.service.RegisterUser(c.Request.Context(),
+	id, err := h.service.RegisterUser(c.Request.Context(),
 		request.Username,
 		request.Email,
 		request.Password,
 	)
 
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, "")
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }

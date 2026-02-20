@@ -2,23 +2,22 @@ package users
 
 import (
 	"context"
-	"fmt"
+	serviceErrors "go-users/errors"
 	"go-users/internal/domain/models"
 	"go-users/internal/domain/ports"
 	usersRepo "go-users/internal/infra/repositories"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type usersService struct {
+type UsersService struct {
 	repository ports.UsersRepositoryPort
 }
 
 func New(pool *pgxpool.Pool) ports.UsersServicePort {
-	return &usersService{repository: usersRepo.New(pool)}
+	return &UsersService{repository: usersRepo.New(pool)}
 }
 
 func HashPassword(password string) (string, error) {
@@ -26,22 +25,22 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (s *usersService) GetUserById(ctx context.Context, userId string) (*models.User, error) {
-	user, err := s.repository.GetById(ctx, userId)
+func (s *UsersService) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
+	user, err := s.repository.GetByID(ctx, userID)
 
 	if err != nil {
-		return nil, err
+		return nil, serviceErrors.ErrUserNotFound
 	}
 
 	return user, nil
 }
 
-func (s *usersService) RegisterUser(ctx context.Context, username string, email string, password string) error {
+func (s *UsersService) RegisterUser(ctx context.Context, username string, email string, password string) (string, error) {
 
 	passwordHash, err := HashPassword(password)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	user := models.User{
@@ -49,19 +48,17 @@ func (s *usersService) RegisterUser(ctx context.Context, username string, email 
 		Email:        email,
 		PasswordHash: passwordHash,
 		Avatar:       "",
-		Skin:         pgtype.Text{String: "", Valid: true},
-		Cloak:        pgtype.Text{String: "", Valid: true},
-		RegisteredAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Skin:         "",
+		Cloak:        "",
+		RegisteredAt: time.Now(),
 		IsActive:     true,
 	}
 
-	fmt.Println(user)
+	id, err := s.repository.CreateUser(ctx, user)
 
-	errS := s.repository.CreateUser(ctx, user)
-
-	if errS != nil {
-		return err
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	return id.String(), nil
 }

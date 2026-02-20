@@ -9,7 +9,9 @@ import (
 	"go-users/internal/domain/ports"
 	httpInfra "go-users/internal/infra/http"
 	userssvc "go-users/internal/infra/services"
+	filessvc "go-users/internal/infra/services/minio"
 	"go-users/pkg/database"
+	"go-users/pkg/minio"
 	"os"
 )
 
@@ -36,10 +38,14 @@ func NewApp(ctx context.Context) (*App, error) {
 
 	poolAdapter := &database.PoolAdapter{Pool: pgxConnection}
 
+	// minio
+	minioClient, err := minio.NewClient(ctx, &configImpl.Minio)
+
 	// services
 	usersServicePort := userssvc.New(pgxConnection)
+	filesServicePort := filessvc.New(pgxConnection, minioClient)
 
-	httpServer := httpInfra.NewServer(&configImpl.Server, usersServicePort)
+	httpServer := httpInfra.NewServer(&configImpl.Server, usersServicePort, filesServicePort)
 	app := &App{
 		config:     configImpl,
 		enviroment: enviroment,

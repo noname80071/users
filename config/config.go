@@ -9,10 +9,9 @@ import (
 )
 
 type Config struct {
-	Server http.ServerConfig `env-prefix:"SERVER_"`
-	//Nats       nats.NatsConfig             `env-prefix:"NATS_"`
-	Database DatabaseConfig `env-prefix:"DB_"`
-	//Logging    logger.LoggingConfig        `env-prefix:"LOG_"`
+	Server   http.ServerConfig `env-prefix:"SERVER_"`
+	Database DatabaseConfig    `env-prefix:"DB_"`
+	Minio    MinioConfig       `env-prefix:"MINIO_"`
 }
 
 type DatabaseConfig struct {
@@ -24,6 +23,14 @@ type DatabaseConfig struct {
 	SSLMode  string `env:"SSL_MODE"`
 	MaxConns int    `env:"MAX_CONNS"`
 	MinConns int    `env:"MIN_CONNS"`
+}
+
+type MinioConfig struct {
+	Endpoint        string `env:"ENDPOINT"`
+	AccessKey       string `env:"ACCESS_KEY"`
+	SecretAccessKey string `env:"SECRET_ACCESS_KEY"`
+	SSLMode         bool   `env:"SSL_MODE"`
+	Region          string `env:"REGION"`
 }
 
 func Load() (*Config, error) {

@@ -28,18 +28,18 @@ func NewPgxConnection(ctx context.Context, cfg *config.DatabaseConfig) (*pgxpool
 
 	config, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка парсинга конфигурации: %w", err)
+		return nil, fmt.Errorf("Error parse configuration: %w", err)
 	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка создания пула: %w", err)
+		return nil, fmt.Errorf("Error create pool: %w", err)
 	}
 
 	// Проверка соединения
 	if err = pool.Ping(ctx); err != nil {
 		pool.Close()
-		return nil, fmt.Errorf("ошибка ping: %w", err)
+		return nil, fmt.Errorf("Error ping: %w", err)
 	}
 
 	return pool, nil
