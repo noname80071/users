@@ -2,10 +2,11 @@ package users
 
 import (
 	"context"
-	"go-users/internal/domain/models"
-	"go-users/internal/domain/ports"
 
-	"go-users/internal/query"
+	"gitlab.com/_spacemc_/web/users/internal/domain/models"
+	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
+
+	"gitlab.com/_spacemc_/web/users/internal/query"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -40,8 +41,8 @@ func (r *UsersRepository) CreateUser(ctx context.Context, user models.User) (uui
 	return id, nil
 }
 
-func (r *UsersRepository) GetByID(ctx context.Context, userId string) (*models.User, error) {
-	userIDUUID, err := uuid.Parse(userId)
+func (r *UsersRepository) GetByID(ctx context.Context, userID string) (*models.User, error) {
+	userIDUUID, err := uuid.Parse(userID)
 
 	if err != nil {
 		return nil, err
@@ -54,14 +55,92 @@ func (r *UsersRepository) GetByID(ctx context.Context, userId string) (*models.U
 	}
 
 	userModel := models.User{
-		Username: user.Username,
-		Email:    user.Email,
-		Avatar:   user.Avatar,
-		Skin:     user.Skin.String,
-		Cloak:    user.Cloak.String,
+		ID:           user.ID.String(),
+		Username:     user.Username,
+		Email:        user.Email,
+		Avatar:       user.Avatar,
+		Skin:         user.Skin.String,
+		Cloak:        user.Cloak.String,
+		RegisteredAt: user.RegisteredAt.Time,
+		IsActive:     user.IsActive,
 	}
 
 	return &userModel, nil
+}
+
+func (r *UsersRepository) GetByEmail(ctx context.Context, userEmail string) (*models.User, error) {
+	user, err := r.q.GetUserByEmail(ctx, userEmail)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userModel := models.User{
+		ID:           user.ID.String(),
+		Username:     user.Username,
+		Email:        user.Email,
+		Avatar:       user.Avatar,
+		Skin:         user.Skin.String,
+		Cloak:        user.Cloak.String,
+		RegisteredAt: user.RegisteredAt.Time,
+		IsActive:     user.IsActive,
+	}
+
+	return &userModel, nil
+}
+
+func (r *UsersRepository) GetByUsername(ctx context.Context, username string) (*models.User, error) {
+	user, err := r.q.GetUserByUsername(ctx, username)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userModel := models.User{
+		ID:           user.ID.String(),
+		Username:     user.Username,
+		Email:        user.Email,
+		Avatar:       user.Avatar,
+		Skin:         user.Skin.String,
+		Cloak:        user.Cloak.String,
+		RegisteredAt: user.RegisteredAt.Time,
+		IsActive:     user.IsActive,
+	}
+
+	return &userModel, nil
+}
+
+func (r *UsersRepository) GetSkin(ctx context.Context, userID string) (string, error) {
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return "", err
+	}
+
+	skinURL, err := r.q.GetUserSkin(ctx, userIDUUID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return skinURL.String, nil
+}
+
+func (r *UsersRepository) GetCloak(ctx context.Context, userID string) (string, error) {
+
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return "", err
+	}
+
+	cloakURL, err := r.q.GetUserCloak(ctx, userIDUUID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return cloakURL.String, nil
 }
 
 func (r *UsersRepository) UploadSkin(ctx context.Context, userID, skinURL string) error {
@@ -85,6 +164,23 @@ func (r *UsersRepository) UploadSkin(ctx context.Context, userID, skinURL string
 	return nil
 }
 
+func (r *UsersRepository) DeleteSkin(ctx context.Context, userID string) error {
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.q.DeleteUserSkin(ctx, userIDUUID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func (r *UsersRepository) UploadCloak(ctx context.Context, userID, cloakURL string) error {
 	userIDUUID, err := uuid.Parse(userID)
 
@@ -104,4 +200,42 @@ func (r *UsersRepository) UploadCloak(ctx context.Context, userID, cloakURL stri
 	}
 
 	return nil
+}
+
+func (r *UsersRepository) DeleteCloak(ctx context.Context, userID string) error {
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.q.DeleteUserCloak(ctx, userIDUUID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (r *UsersRepository) UpdateUserStatus(ctx context.Context, userID string, active bool) (string, error) {
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return "", err
+	}
+
+	params := query.UpdateUserStatusParams{
+		IsActive: active,
+		ID:       userIDUUID,
+	}
+
+	id, err := r.q.UpdateUserStatus(ctx, params)
+
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
 }

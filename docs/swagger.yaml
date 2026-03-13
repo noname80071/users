@@ -1,0 +1,471 @@
+basePath: /
+definitions:
+  ginx.ErrorResponse:
+    description: Стандартная структура ответа при возникновении ошибки
+    properties:
+      code:
+        description: Код ошибки для клиента
+        example: ERROR_CODE
+        type: string
+      details:
+        description: Дополнительные детали ошибки
+        example: Дополнительные детали ошибки
+        type: string
+      error:
+        example: true
+        type: boolean
+      message:
+        example: Произошла ошибка
+        type: string
+    type: object
+  ginx.SuccessResponse-internal_infra_http_controllers_files_Response:
+    properties:
+      data:
+        $ref: '#/definitions/internal_infra_http_controllers_files.Response'
+      error:
+        example: false
+        type: boolean
+      message:
+        example: Операция выполнена успешно
+        type: string
+    type: object
+  ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse:
+    properties:
+      data:
+        $ref: '#/definitions/internal_infra_http_controllers_files.UploadResponse'
+      error:
+        example: false
+        type: boolean
+      message:
+        example: Операция выполнена успешно
+        type: string
+    type: object
+  ginx.SuccessResponse-internal_infra_http_controllers_users_UpdateUserStatusResponse:
+    properties:
+      data:
+        $ref: '#/definitions/internal_infra_http_controllers_users.UpdateUserStatusResponse'
+      error:
+        example: false
+        type: boolean
+      message:
+        example: Операция выполнена успешно
+        type: string
+    type: object
+  ginx.SuccessResponse-internal_infra_http_controllers_users_UserRegisterResponse:
+    properties:
+      data:
+        $ref: '#/definitions/internal_infra_http_controllers_users.UserRegisterResponse'
+      error:
+        example: false
+        type: boolean
+      message:
+        example: Операция выполнена успешно
+        type: string
+    type: object
+  ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse:
+    properties:
+      data:
+        $ref: '#/definitions/internal_infra_http_controllers_users.UsersGetByResponse'
+      error:
+        example: false
+        type: boolean
+      message:
+        example: Операция выполнена успешно
+        type: string
+    type: object
+  internal_infra_http_controllers_files.Response:
+    properties:
+      message:
+        type: string
+    type: object
+  internal_infra_http_controllers_files.UploadResponse:
+    properties:
+      message:
+        type: string
+      url:
+        type: string
+      user_id:
+        type: string
+    type: object
+  internal_infra_http_controllers_users.UpdateUserStatusRequest:
+    properties:
+      is_active:
+        type: boolean
+    type: object
+  internal_infra_http_controllers_users.UpdateUserStatusResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  internal_infra_http_controllers_users.UserRegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_infra_http_controllers_users.UserRegisterResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  internal_infra_http_controllers_users.UsersGetByResponse:
+    properties:
+      avatar:
+        type: string
+      cloak:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      registered_at:
+        type: string
+      skin:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Users microservice
+  title: Go Microservice Users API
+  version: "1.0"
+paths:
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о пользователе по его уникальному идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Получить пользователя по ID
+      tags:
+      - users
+  /users/{id}/cloak:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет плащ пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_Response'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "500":
+          description: Ошибка удаления
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Удалить плащ пользоваетя
+      tags:
+      - files
+    get:
+      consumes:
+      - application/json
+      description: Получить URL плаща пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Получить URL плаща пользователя
+      tags:
+      - files
+    post:
+      consumes:
+      - application/json
+      description: Загружает плащ пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Файл плаща (png)
+        in: formData
+        name: cloak
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "500":
+          description: Ошибка загрузки файла
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Загрузить плащ пользователю
+      tags:
+      - files
+  /users/{id}/skin:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет скин пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_Response'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "500":
+          description: Ошибка удаления
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Удалить скин пользоваетя
+      tags:
+      - files
+    get:
+      consumes:
+      - application/json
+      description: Получить URL скина пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse'
+        "400":
+          description: Неверный ID
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Получить URL скина пользователя
+      tags:
+      - files
+    post:
+      consumes:
+      - application/json
+      description: Загружает скин пользователя по его ID. Вырезает голову из скина
+        и загружает в avatar
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Файл скина (png)
+        in: formData
+        name: skin
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "500":
+          description: Ошибка загрузки файла
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Загрузить скин пользователю
+      tags:
+      - files
+  /users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Активирует или деактивирует пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новый статус пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_http_controllers_users.UpdateUserStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный запрос
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UpdateUserStatusResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "422":
+          description: Ошибка бизнес-логики
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Обновление статуса пользователя
+      tags:
+      - users
+  /users/email/{email}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о пользователе по его Email
+      parameters:
+      - description: Email пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Получить пользователя по Email
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с указанными username, email и паролем
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_http_controllers_users.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UserRegisterResponse'
+        "400":
+          description: Неверный формат запроса или ошибка валидации
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+        "422":
+          description: Пользователь уже существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Регистрация нового пользователя
+      tags:
+      - users
+  /users/username/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о пользователе по его Username
+      parameters:
+      - description: Username пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse'
+        "404":
+          description: Пользователя не существует
+          schema:
+            $ref: '#/definitions/ginx.ErrorResponse'
+      summary: Получить пользователя по Username
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: 'Тип: Bearer {token}. Токен получается через Keycloak.'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

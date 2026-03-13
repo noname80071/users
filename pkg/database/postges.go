@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"go-users/config"
+	"gitlab.com/_spacemc_/web/users/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

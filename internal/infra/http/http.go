@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"go-users/internal/domain/ports"
+	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
 )
 
 type HttpService struct {
@@ -15,6 +15,17 @@ type HttpService struct {
 	server  *http.Server
 }
 
+// @title           Go Microservice Users API
+// @version         1.0
+// @description     Users microservice
+
+// @host      localhost:8080
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Тип: Bearer {token}. Токен получается через Keycloak.
 func NewServer(cfg *ServerConfig, usersServicePort ports.UsersServicePort, filesServicePort ports.FilesServicePort) ports.InfrastructureService {
 	router := NewRouter(Deps{
 		UsersServicePort: usersServicePort,

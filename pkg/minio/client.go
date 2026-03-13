@@ -3,20 +3,22 @@ package minio
 import (
 	"context"
 	"fmt"
-	"go-users/config"
 	"io"
 	"log"
+
+	"gitlab.com/_spacemc_/web/users/config"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 type StoragePort interface {
-	Upload(ctx context.Context, bucket string, fileName string, fileReader io.Reader, fileSize int64, contentType string) (string, error)
+	Upload(ctx context.Context, bucket string, fileName string, fileReader io.Reader, fileSize int64) (string, error)
 }
 
 type Client struct {
 	Client *minio.Client
+	Config *config.MinioConfig
 }
 
 func NewClient(ctx context.Context, cfg *config.MinioConfig) (*Client, error) {
@@ -30,21 +32,10 @@ func NewClient(ctx context.Context, cfg *config.MinioConfig) (*Client, error) {
 
 	log.Printf("Клиент создан")
 
-	return &Client{Client: minioClient}, nil
+	return &Client{Client: minioClient, Config: cfg}, nil
 }
 
-func (c *Client) Upload(ctx context.Context, bucket string, fileName string, fileReader io.Reader, fileSize int64, contentType string) (string, error) {
-
-	exists, err := c.Client.BucketExists(ctx, bucket)
-
-	if err != nil || !exists {
-		err := c.Client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
-		if err != nil {
-			fmt.Errorf("failed to create bucket")
-			return "", err
-		}
-	}
-
+func (c *Client) Upload(ctx context.Context, bucket string, fileName string, fileReader io.Reader, fileSize int64) (string, error) {
 	info, err := c.Client.PutObject(ctx, bucket, fileName, fileReader, fileSize, minio.PutObjectOptions{
 		UserMetadata: map[string]string{
 			"Name": fileName,
@@ -52,12 +43,20 @@ func (c *Client) Upload(ctx context.Context, bucket string, fileName string, fil
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
-		fmt.Errorf("failed to upload file: %w", err)
-		return "", err
+		return "", fmt.Errorf("failed to upload file: %w", err)
 	}
 
-	url := fmt.Sprintf("/%s/%s", bucket, info.Key)
+	url := fmt.Sprintf("%s/browser/%s/%s", c.Config.ClientEndpoint, bucket, info.Key)
 
 	return url, nil
 
+}
+
+func (c *Client) Delete(ctx context.Context, bucket string, fileName string) error {
+	err := c.Client.RemoveObject(ctx, bucket, fileName, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete file %s from bucket %s: %w", fileName, bucket, err)
+	}
+
+	return nil
 }

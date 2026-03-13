@@ -3,15 +3,19 @@
 package config
 
 import (
-	"go-users/internal/infra/http"
+	"gitlab.com/_spacemc_/web/gokit/adapters/keycloak"
+	"gitlab.com/_spacemc_/web/gokit/logger"
+	"gitlab.com/_spacemc_/web/users/internal/infra/http"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Server   http.ServerConfig `env-prefix:"SERVER_"`
-	Database DatabaseConfig    `env-prefix:"DB_"`
-	Minio    MinioConfig       `env-prefix:"MINIO_"`
+	Server   http.ServerConfig    `env-prefix:"SERVER_"`
+	Database DatabaseConfig       `env-prefix:"DB_"`
+	Minio    MinioConfig          `env-prefix:"MINIO_"`
+	Keycloak keycloak.Config      `env-prefix:"KEYCLOAK_"`
+	Logging  logger.LoggingConfig `env-prefix:"LOG_"`
 }
 
 type DatabaseConfig struct {
@@ -27,6 +31,7 @@ type DatabaseConfig struct {
 
 type MinioConfig struct {
 	Endpoint        string `env:"ENDPOINT"`
+	ClientEndpoint  string `env:"CLIENT_ENDPOINT"`
 	AccessKey       string `env:"ACCESS_KEY"`
 	SecretAccessKey string `env:"SECRET_ACCESS_KEY"`
 	SSLMode         bool   `env:"SSL_MODE"`

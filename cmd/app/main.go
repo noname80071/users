@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go-users/internal/app"
+	"gitlab.com/_spacemc_/web/users/internal/app"
 )
 
 func main() {

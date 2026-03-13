@@ -5,14 +5,15 @@ package app
 import (
 	"context"
 	"fmt"
-	"go-users/config"
-	"go-users/internal/domain/ports"
-	httpInfra "go-users/internal/infra/http"
-	userssvc "go-users/internal/infra/services"
-	filessvc "go-users/internal/infra/services/minio"
-	"go-users/pkg/database"
-	"go-users/pkg/minio"
 	"os"
+
+	"gitlab.com/_spacemc_/web/users/config"
+	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
+	httpInfra "gitlab.com/_spacemc_/web/users/internal/infra/http"
+	filessvc "gitlab.com/_spacemc_/web/users/internal/infra/services/files"
+	userssvc "gitlab.com/_spacemc_/web/users/internal/infra/services/users"
+	"gitlab.com/_spacemc_/web/users/pkg/database"
+	"gitlab.com/_spacemc_/web/users/pkg/minio"
 )
 
 type App struct {

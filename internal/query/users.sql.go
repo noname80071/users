@@ -54,8 +54,73 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UU
 	return id, err
 }
 
+const deleteUserCloak = `-- name: DeleteUserCloak :exec
+UPDATE users
+SET cloak = NULL
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUserCloak(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserCloak, id)
+	return err
+}
+
+const deleteUserSkin = `-- name: DeleteUserSkin :exec
+UPDATE users
+SET skin = NULL
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUserSkin(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserSkin, id)
+	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT
+    id,
+    username,
+    email,
+    avatar,
+    skin,
+    cloak,
+    registered_at,
+    is_active
+FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+type GetUserByEmailRow struct {
+	ID           uuid.UUID
+	Username     string
+	Email        string
+	Avatar       string
+	Skin         pgtype.Text
+	Cloak        pgtype.Text
+	RegisteredAt pgtype.Timestamptz
+	IsActive     bool
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Avatar,
+		&i.Skin,
+		&i.Cloak,
+		&i.RegisteredAt,
+		&i.IsActive,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT 
+    id,
     username,
     email,
     avatar,
@@ -69,6 +134,7 @@ LIMIT 1
 `
 
 type GetUserByIDRow struct {
+	ID           uuid.UUID
 	Username     string
 	Email        string
 	Avatar       string
@@ -82,6 +148,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i GetUserByIDRow
 	err := row.Scan(
+		&i.ID,
 		&i.Username,
 		&i.Email,
 		&i.Avatar,
@@ -91,6 +158,70 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 		&i.IsActive,
 	)
 	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT
+    id,
+    username,
+    email,
+    avatar,
+    skin,
+    cloak,
+    registered_at,
+    is_active
+FROM users
+WHERE username = $1
+LIMIT 1
+`
+
+type GetUserByUsernameRow struct {
+	ID           uuid.UUID
+	Username     string
+	Email        string
+	Avatar       string
+	Skin         pgtype.Text
+	Cloak        pgtype.Text
+	RegisteredAt pgtype.Timestamptz
+	IsActive     bool
+}
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (GetUserByUsernameRow, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
+	var i GetUserByUsernameRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Avatar,
+		&i.Skin,
+		&i.Cloak,
+		&i.RegisteredAt,
+		&i.IsActive,
+	)
+	return i, err
+}
+
+const getUserCloak = `-- name: GetUserCloak :one
+SELECT cloak from users WHERE id = $1
+`
+
+func (q *Queries) GetUserCloak(ctx context.Context, id uuid.UUID) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getUserCloak, id)
+	var cloak pgtype.Text
+	err := row.Scan(&cloak)
+	return cloak, err
+}
+
+const getUserSkin = `-- name: GetUserSkin :one
+SELECT skin from users WHERE id = $1
+`
+
+func (q *Queries) GetUserSkin(ctx context.Context, id uuid.UUID) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getUserSkin, id)
+	var skin pgtype.Text
+	err := row.Scan(&skin)
+	return skin, err
 }
 
 const updateUserCloak = `-- name: UpdateUserCloak :exec
@@ -123,4 +254,23 @@ type UpdateUserSkinParams struct {
 func (q *Queries) UpdateUserSkin(ctx context.Context, arg UpdateUserSkinParams) error {
 	_, err := q.db.Exec(ctx, updateUserSkin, arg.Skin, arg.ID)
 	return err
+}
+
+const updateUserStatus = `-- name: UpdateUserStatus :one
+UPDATE users
+SET is_active = $1
+WHERE id = $2
+RETURNING id
+`
+
+type UpdateUserStatusParams struct {
+	IsActive bool
+	ID       uuid.UUID
+}
+
+func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, updateUserStatus, arg.IsActive, arg.ID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }

@@ -1,0 +1,705 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Users microservice",
+        "title": "Go Microservice Users API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/users/email/{email}": {
+            "get": {
+                "description": "Возвращает информацию о пользователе по его Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить пользователя по Email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/register": {
+            "post": {
+                "description": "Создает нового пользователя с указанными username, email и паролем",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Регистрация нового пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные для регистрации",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_http_controllers_users.UserRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UserRegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат запроса или ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Пользователь уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/username/{username}": {
+            "get": {
+                "description": "Возвращает информацию о пользователе по его Username",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить пользователя по Username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Возвращает информацию о пользователе по его уникальному идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить пользователя по ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/cloak": {
+            "get": {
+                "description": "Получить URL плаща пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Получить URL плаща пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Загружает плащ пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Загрузить плащ пользователю",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Файл плаща (png)",
+                        "name": "cloak",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка загрузки файла",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет плащ пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Удалить плащ пользоваетя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка удаления",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/skin": {
+            "get": {
+                "description": "Получить URL скина пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Получить URL скина пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Загружает скин пользователя по его ID. Вырезает голову из скина и загружает в avatar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Загрузить скин пользователю",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Файл скина (png)",
+                        "name": "skin",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка загрузки файла",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет скин пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Удалить скин пользоваетя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_files_Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователя не существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка удаления",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/status": {
+            "patch": {
+                "description": "Активирует или деактивирует пользователя по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Обновление статуса пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Новый статус пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_http_controllers_users.UpdateUserStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UpdateUserStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат запроса",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка бизнес-логики",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ginx.ErrorResponse": {
+            "description": "Стандартная структура ответа при возникновении ошибки",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Код ошибки для клиента",
+                    "type": "string",
+                    "example": "ERROR_CODE"
+                },
+                "details": {
+                    "description": "Дополнительные детали ошибки",
+                    "type": "string",
+                    "example": "Дополнительные детали ошибки"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Произошла ошибка"
+                }
+            }
+        },
+        "ginx.SuccessResponse-internal_infra_http_controllers_files_Response": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_infra_http_controllers_files.Response"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Операция выполнена успешно"
+                }
+            }
+        },
+        "ginx.SuccessResponse-internal_infra_http_controllers_files_UploadResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_infra_http_controllers_files.UploadResponse"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Операция выполнена успешно"
+                }
+            }
+        },
+        "ginx.SuccessResponse-internal_infra_http_controllers_users_UpdateUserStatusResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_infra_http_controllers_users.UpdateUserStatusResponse"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Операция выполнена успешно"
+                }
+            }
+        },
+        "ginx.SuccessResponse-internal_infra_http_controllers_users_UserRegisterResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_infra_http_controllers_users.UserRegisterResponse"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Операция выполнена успешно"
+                }
+            }
+        },
+        "ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_infra_http_controllers_users.UsersGetByResponse"
+                },
+                "error": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Операция выполнена успешно"
+                }
+            }
+        },
+        "internal_infra_http_controllers_files.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_infra_http_controllers_files.UploadResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_infra_http_controllers_users.UpdateUserStatusRequest": {
+            "type": "object",
+            "properties": {
+                "is_active": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "internal_infra_http_controllers_users.UpdateUserStatusResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_infra_http_controllers_users.UserRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_infra_http_controllers_users.UserRegisterResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_infra_http_controllers_users.UsersGetByResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "cloak": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "registered_at": {
+                    "type": "string"
+                },
+                "skin": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Тип: Bearer {token}. Токен получается через Keycloak.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
