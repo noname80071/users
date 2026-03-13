@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"path/filepath"
 
 	usersErrors "gitlab.com/_spacemc_/web/users/errors"
 	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
@@ -73,12 +72,17 @@ func (s *FilesService) UploadSkin(ctx context.Context, userID string, fileReader
 	avatarFilename := fmt.Sprintf("avatars/avatar_%s.png", userID)
 	skinFilename := fmt.Sprintf("skins/skin_%s.png", userID)
 
-	_, err = s.storage.Upload(ctx, "users", avatarFilename, avatarReader, avatarReader.Size())
+	avatarURL, err := s.storage.Upload(ctx, "users", avatarFilename, avatarReader, avatarReader.Size())
 	if err != nil {
 		return "", err
 	}
 
 	skinURL, err := s.storage.Upload(ctx, "users", skinFilename, skinReader, fileSize)
+	if err != nil {
+		return "", err
+	}
+
+	err = s.repository.UploadAvatar(ctx, userID, avatarURL)
 	if err != nil {
 		return "", err
 	}
@@ -93,8 +97,7 @@ func (s *FilesService) UploadSkin(ctx context.Context, userID string, fileReader
 
 func (s *FilesService) UploadCloak(ctx context.Context, userID string, fileReader io.Reader, filename string, fileSize int64) (string, error) {
 
-	ext := filepath.Ext(filename) // УДАЛИТЬ!!!!
-	cloakFilename := fmt.Sprintf("cloaks/cloak_%s%s", userID, ext)
+	cloakFilename := fmt.Sprintf("cloaks/cloak_%s.png", userID)
 
 	err := s.storage.Delete(ctx, "users", cloakFilename)
 	if err != nil {

@@ -224,6 +224,22 @@ func (q *Queries) GetUserSkin(ctx context.Context, id uuid.UUID) (pgtype.Text, e
 	return skin, err
 }
 
+const updateUserAvatar = `-- name: UpdateUserAvatar :exec
+UPDATE users
+SET avatar = $1
+WHERE id = $2
+`
+
+type UpdateUserAvatarParams struct {
+	Avatar string
+	ID     uuid.UUID
+}
+
+func (q *Queries) UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) error {
+	_, err := q.db.Exec(ctx, updateUserAvatar, arg.Avatar, arg.ID)
+	return err
+}
+
 const updateUserCloak = `-- name: UpdateUserCloak :exec
 UPDATE users 
 SET cloak = $1 

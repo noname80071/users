@@ -34,6 +34,8 @@ type UsersRepositoryPort interface {
 
 	UploadCloak(ctx context.Context, userID, skinURL string) error
 	DeleteCloak(ctx context.Context, userID string) error
+
+	UploadAvatar(ctx context.Context, userID, avatarURL string) error
 }
 
 type InfrastructureService interface {

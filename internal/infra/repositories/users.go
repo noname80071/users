@@ -181,6 +181,26 @@ func (r *UsersRepository) DeleteSkin(ctx context.Context, userID string) error {
 
 }
 
+func (r *UsersRepository) UploadAvatar(ctx context.Context, userID, avatarURL string) error {
+	userIDUUID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return err
+	}
+
+	params := query.UpdateUserAvatarParams{
+		Avatar: avatarURL,
+		ID:     userIDUUID,
+	}
+
+	err = r.q.UpdateUserAvatar(ctx, params)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *UsersRepository) UploadCloak(ctx context.Context, userID, cloakURL string) error {
 	userIDUUID, err := uuid.Parse(userID)
 

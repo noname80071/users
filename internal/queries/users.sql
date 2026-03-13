@@ -87,3 +87,7 @@ UPDATE users
 SET cloak = NULL
 WHERE id = $1;
 
+-- name: UpdateUserAvatar :exec
+UPDATE users
+SET avatar = $1
+WHERE id = $2;
