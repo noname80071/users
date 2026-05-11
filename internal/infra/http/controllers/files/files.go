@@ -1,9 +1,9 @@
 package files
 
 import (
+	"context"
 	"errors"
-
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
+	"io"
 
 	"github.com/gin-gonic/gin"
 	usersErrors "gitlab.com/_spacemc_/web/users/errors"
@@ -11,11 +11,22 @@ import (
 	"gitlab.com/_spacemc_/web/gokit/ginx"
 )
 
-type Handler struct {
-	service ports.FilesServicePort
+type FilesService interface {
+	GetUserSkin(ctx context.Context, userID string) (string, error)
+	GetUserCloak(ctx context.Context, userID string) (string, error)
+
+	UploadSkin(ctx context.Context, userID string, fileReader io.Reader, filename string, fileSize int64) (string, error)
+	DeleteSkin(ctx context.Context, userID string) error
+
+	UploadCloak(ctx context.Context, userID string, fileReader io.Reader, filename string, fileSize int64) (string, error)
+	DeleteCloak(ctx context.Context, userID string) error
 }
 
-func NewHandler(service ports.FilesServicePort) *Handler {
+type Handler struct {
+	service FilesService
+}
+
+func NewHandler(service FilesService) *Handler {
 	return &Handler{service: service}
 }
 
@@ -36,7 +47,7 @@ func (h *Handler) GetSkin(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -50,7 +61,7 @@ func (h *Handler) GetSkin(c *gin.Context) {
 
 	}
 
-	response := GetSkin{
+	response := GetSkinResponse{
 		Skin: skinURL,
 	}
 
@@ -74,7 +85,7 @@ func (h *Handler) GetCloak(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -89,7 +100,7 @@ func (h *Handler) GetCloak(c *gin.Context) {
 
 	}
 
-	response := GetCloak{
+	response := GetCloakResponse{
 		Cloak: cloakURL,
 	}
 
@@ -114,7 +125,7 @@ func (h *Handler) UploadSkin(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -164,7 +175,7 @@ func (h *Handler) DeleteSkin(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -192,7 +203,7 @@ func (h *Handler) DeleteSkin(c *gin.Context) {
 // @Param 		 cloak formData file true "Файл плаща (png)"
 // @Success      200  {object} ginx.SuccessResponse[UploadResponse] "Успешный ответ"
 // @Failure      404  {object}  ginx.ErrorResponse "Пользователя не существует"
-// @Failure      500  {object}  ginx.ErrorResponse "Ошибка загрузки файла"
+// @Failure      500  {object}  ginx.ErrorResponse "Ошибка загрузки или открытия файла"
 // @Router       /users/{id}/cloak [post]
 func (h *Handler) UploadCloak(c *gin.Context) {
 	p := ginx.NewGinxParser(c)
@@ -200,7 +211,7 @@ func (h *Handler) UploadCloak(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -250,7 +261,7 @@ func (h *Handler) DeleteCloak(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 

@@ -10,10 +10,10 @@ type Response struct {
 	Message string `json:"message"`
 }
 
-type GetSkin struct {
+type GetSkinResponse struct {
 	Skin string `json:"skin"`
 }
 
-type GetCloak struct {
+type GetCloakResponse struct {
 	Cloak string `json:"cloak"`
 }

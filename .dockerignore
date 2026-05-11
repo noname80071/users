@@ -1,0 +1,132 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+vendor/
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.project
+.classpath
+.settings/
+
+# Документация
+*.md
+!README.md
+*.pdf
+*.txt
+
+# Логи
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Файлы окружения
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Тесты и coverage
+coverage.txt
+coverage.html
+*.coverprofile
+*.test
+*.prof
+*.pprof
+
+# Бинарники приложения
+/users-service
+users-service
+/app/users-service
+dist/
+bin/
+build/
+
+# Makefile и скрипты
+Makefile
+*.sh
+*.bat
+*.ps1
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+jenkins/
+.drone.yml
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.tmp
+*.temp
+
+# SSL certificates
+*.crt
+*.key
+*.pem
+
+# Temporary files
+tmp/
+temp/
+*.swp
+*.swo
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Kubernetes
+k8s/
+*.yaml
+*.yml
+!docker-compose.yml
+
+# Покрытие кода
+coverage/
+*.cover
+
+# Инструменты для разработки
+.golangci.yml
+.goreleaser.yml
+.goxc.json
+
+# Файлы конкретных приложений (если есть)
+*.cert
+*.key

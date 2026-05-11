@@ -8,18 +8,23 @@ import (
 	"os"
 
 	"gitlab.com/_spacemc_/web/users/config"
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
 	httpInfra "gitlab.com/_spacemc_/web/users/internal/infra/http"
+	repo "gitlab.com/_spacemc_/web/users/internal/infra/repositories"
 	filessvc "gitlab.com/_spacemc_/web/users/internal/infra/services/files"
 	userssvc "gitlab.com/_spacemc_/web/users/internal/infra/services/users"
 	"gitlab.com/_spacemc_/web/users/pkg/database"
 	"gitlab.com/_spacemc_/web/users/pkg/minio"
 )
 
+type InfrastructureService interface {
+	Start(ctx context.Context) error
+	GracefulShutdown(ctx context.Context) error
+}
+
 type App struct {
 	config     *config.Config
 	enviroment string
-	server     ports.InfrastructureService
+	server     InfrastructureService
 	postgres   *database.PoolAdapter
 }
 
@@ -42,11 +47,14 @@ func NewApp(ctx context.Context) (*App, error) {
 	// minio
 	minioClient, err := minio.NewClient(ctx, &configImpl.Minio)
 
-	// services
-	usersServicePort := userssvc.New(pgxConnection)
-	filesServicePort := filessvc.New(pgxConnection, minioClient)
+	// repositories
+	usersRepo := repo.New(pgxConnection)
 
-	httpServer := httpInfra.NewServer(&configImpl.Server, usersServicePort, filesServicePort)
+	// services
+	usersService := userssvc.New(usersRepo)
+	filesService := filessvc.New(usersRepo, minioClient)
+
+	httpServer := httpInfra.NewServer(&configImpl.Server, usersService, filesService)
 	app := &App{
 		config:     configImpl,
 		enviroment: enviroment,

@@ -8,23 +8,33 @@ import (
 	"io"
 
 	usersErrors "gitlab.com/_spacemc_/web/users/errors"
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
-	usersRepo "gitlab.com/_spacemc_/web/users/internal/infra/repositories"
 
 	avatars "gitlab.com/_spacemc_/web/users/pkg/avatars"
 	minioClient "gitlab.com/_spacemc_/web/users/pkg/minio"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type UsersRepository interface {
+	GetSkin(ctx context.Context, userID string) (string, error)
+	GetCloak(ctx context.Context, userID string) (string, error)
+
+	UploadSkin(ctx context.Context, userID, skinURL string) error
+	DeleteSkin(ctx context.Context, userID string) error
+
+	UploadCloak(ctx context.Context, userID, skinURL string) error
+	DeleteCloak(ctx context.Context, userID string) error
+
+	UploadAvatar(ctx context.Context, userID, avatarURL string) error
+}
+
 type FilesService struct {
-	repository ports.UsersRepositoryPort
+	repository UsersRepository
 	storage    *minioClient.Client
 }
 
-func New(pool *pgxpool.Pool, minioClient *minioClient.Client) ports.FilesServicePort {
-	return &FilesService{repository: usersRepo.New(pool), storage: minioClient}
+func New(repo UsersRepository, minioClient *minioClient.Client) *FilesService {
+	return &FilesService{repository: repo, storage: minioClient}
 }
 
 func (s *FilesService) GetUserSkin(ctx context.Context, userID string) (string, error) {

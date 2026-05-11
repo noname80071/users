@@ -3,12 +3,37 @@ package http
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"time"
 
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
+	"gitlab.com/_spacemc_/web/users/internal/domain/models"
 )
+
+type InfrastructureService interface {
+	Start(ctx context.Context) error
+	GracefulShutdown(ctx context.Context) error
+}
+
+type UsersService interface {
+	GetUserByID(ctx context.Context, id string) (*models.User, error)
+	GetUserByEmail(ctx context.Context, userEmail string) (*models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	RegisterUser(ctx context.Context, username string, email string, password string) (string, error)
+	UpdateUserStatus(ctx context.Context, userID string, active bool) (string, error)
+}
+
+type FilesService interface {
+	GetUserSkin(ctx context.Context, userID string) (string, error)
+	GetUserCloak(ctx context.Context, userID string) (string, error)
+
+	UploadSkin(ctx context.Context, userID string, fileReader io.Reader, filename string, fileSize int64) (string, error)
+	DeleteSkin(ctx context.Context, userID string) error
+
+	UploadCloak(ctx context.Context, userID string, fileReader io.Reader, filename string, fileSize int64) (string, error)
+	DeleteCloak(ctx context.Context, userID string) error
+}
 
 type HttpService struct {
 	address string
@@ -26,10 +51,10 @@ type HttpService struct {
 // @in header
 // @name Authorization
 // @description Тип: Bearer {token}. Токен получается через Keycloak.
-func NewServer(cfg *ServerConfig, usersServicePort ports.UsersServicePort, filesServicePort ports.FilesServicePort) ports.InfrastructureService {
+func NewServer(cfg *ServerConfig, usersService UsersService, filesService FilesService) InfrastructureService {
 	router := NewRouter(Deps{
-		UsersServicePort: usersServicePort,
-		FilesServicePort: filesServicePort,
+		UsersService: usersService,
+		FilesService: filesService,
 	})
 	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 

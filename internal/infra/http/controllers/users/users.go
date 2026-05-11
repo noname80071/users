@@ -3,20 +3,29 @@
 package users
 
 import (
+	"context"
 	"errors"
 
 	usersErrors "gitlab.com/_spacemc_/web/users/errors"
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
+	"gitlab.com/_spacemc_/web/users/internal/domain/models"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/_spacemc_/web/gokit/ginx"
 )
 
-type Handler struct {
-	service ports.UsersServicePort
+type UsersService interface {
+	GetUserByID(ctx context.Context, id string) (*models.User, error)
+	GetUserByEmail(ctx context.Context, userEmail string) (*models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	RegisterUser(ctx context.Context, username string, email string, password string) (string, error)
+	UpdateUserStatus(ctx context.Context, userID string, active bool) (string, error)
 }
 
-func NewHandler(service ports.UsersServicePort) *Handler {
+type Handler struct {
+	service UsersService
+}
+
+func NewHandler(service UsersService) *Handler {
 	return &Handler{service: service}
 }
 
@@ -28,6 +37,7 @@ func NewHandler(service ports.UsersServicePort) *Handler {
 // @Produce      json
 // @Param        id   path      string  true  "ID пользователя"
 // @Success      200  {object} ginx.SuccessResponse[UsersGetByResponse] "Успешный ответ"
+// Failure 		 400  {object} ginx.ErrorResponse "Неверный ID"
 // @Failure      404  {object}  ginx.ErrorResponse "Пользователя не существует"
 // @Router       /users/{id} [get]
 func (h *Handler) GetUserByID(c *gin.Context) {
@@ -36,7 +46,7 @@ func (h *Handler) GetUserByID(c *gin.Context) {
 	userID, err := p.GetPathString("id")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -74,6 +84,7 @@ func (h *Handler) GetUserByID(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      string  true  "Email пользователя"
 // @Success      200  {object} ginx.SuccessResponse[UsersGetByResponse] "Успешный ответ"
+// @Failure 	 400  {object} ginx.ErrorResponse "Неверный email"
 // @Failure      404  {object}  ginx.ErrorResponse "Пользователя не существует"
 // @Router       /users/email/{email} [get]
 func (h *Handler) GetUserByEmail(c *gin.Context) {
@@ -82,7 +93,7 @@ func (h *Handler) GetUserByEmail(c *gin.Context) {
 	userEmail, err := p.GetPathString("email")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -119,6 +130,7 @@ func (h *Handler) GetUserByEmail(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      string  true  "Username пользователя"
 // @Success      200  {object} ginx.SuccessResponse[UsersGetByResponse] "Успешный ответ"
+// @Failure      400  {object} ginx.ErrorResponse "Неверный username"
 // @Failure      404  {object}  ginx.ErrorResponse "Пользователя не существует"
 // @Router       /users/username/{username} [get]
 func (h *Handler) GetUserByUsername(c *gin.Context) {
@@ -127,7 +139,7 @@ func (h *Handler) GetUserByUsername(c *gin.Context) {
 	userUsername, err := p.GetPathString("username")
 
 	if err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
@@ -166,7 +178,8 @@ func (h *Handler) GetUserByUsername(c *gin.Context) {
 // @Param        request body UserRegisterRequest true "Данные для регистрации"
 // @Success      201  {object}  ginx.SuccessResponse[UserRegisterResponse] "Успешный ответ"
 // @Failure      400  {object}  ginx.ErrorResponse  "Неверный формат запроса или ошибка валидации"
-// @Failure      422  {object}  ginx.ErrorResponse  "Пользователь уже существует"
+// @Failure      409  {object}  ginx.ErrorResponse  "Пользователь уже существует"
+// @Failure      500  {object} ginx.ErrorResponse "Внутренняя ошибка сервера"
 // @Router       /users/register [post]
 func (h *Handler) UserRegister(c *gin.Context) {
 
@@ -183,6 +196,14 @@ func (h *Handler) UserRegister(c *gin.Context) {
 	)
 
 	if err != nil {
+		if errors.Is(err, usersErrors.ErrEmailInvalid) || errors.Is(err, usersErrors.ErrPasswordWeak) || errors.Is(err, usersErrors.ErrUsernameInvalid) {
+			ginx.WriteBadRequest(c)
+			return
+		}
+		if errors.Is(err, usersErrors.ErrUserAlreadyExists) {
+			ginx.WriteErrorResponse(c, ginx.Conflict)
+			return
+		}
 		ginx.WriteErrorResponse(c, ginx.InternalServerError)
 		return
 	}
@@ -205,7 +226,6 @@ func (h *Handler) UserRegister(c *gin.Context) {
 // @Success      200     {object} ginx.SuccessResponse[UpdateUserStatusResponse] "Успешный запрос"
 // @Failure      400     {object} ginx.ErrorResponse                  "Неверный формат запроса"
 // @Failure      404     {object} ginx.ErrorResponse                  "Пользователь не найден"
-// @Failure      422     {object} ginx.ErrorResponse                  "Ошибка бизнес-логики"
 // @Router       /users/{id}/status [patch]
 func (h *Handler) UpdateUserStatus(c *gin.Context) {
 	userID := c.Param("id")
@@ -213,17 +233,18 @@ func (h *Handler) UpdateUserStatus(c *gin.Context) {
 	var request UpdateUserStatusRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		ginx.WriteErrorResponse(c, ginx.BadRequest)
+		ginx.WriteBadRequest(c)
 		return
 	}
 
 	id, err := h.service.UpdateUserStatus(c.Request.Context(), userID, request.Active)
 
 	if err != nil {
-		// switch {
-		// case errors.Is(err, serviceErrors.ErrUserNotFound):
-		// 	c.JSON(http.StatusNotFound, "User not found")
-		// }
+		switch {
+		case errors.Is(err, usersErrors.ErrUserNotFound):
+			ginx.WriteNotFound(c)
+		}
+
 		return
 	}
 

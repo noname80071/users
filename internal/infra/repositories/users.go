@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"gitlab.com/_spacemc_/web/users/internal/domain/models"
-	"gitlab.com/_spacemc_/web/users/internal/domain/ports"
 
 	"gitlab.com/_spacemc_/web/users/internal/query"
 
@@ -17,7 +16,7 @@ type UsersRepository struct {
 	q *query.Queries
 }
 
-func New(pool *pgxpool.Pool) ports.UsersRepositoryPort {
+func New(pool *pgxpool.Pool) *UsersRepository {
 	return &UsersRepository{q: query.New(pool)}
 }
 

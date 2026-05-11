@@ -44,6 +44,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse"
                         }
                     },
+                    "400": {
+                        "description": "Неверный email",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Пользователя не существует",
                         "schema": {
@@ -90,8 +96,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/ginx.ErrorResponse"
                         }
                     },
-                    "422": {
+                    "409": {
                         "description": "Пользователь уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/ginx.ErrorResponse"
                         }
@@ -126,6 +138,12 @@ const docTemplate = `{
                         "description": "Успешный ответ",
                         "schema": {
                             "$ref": "#/definitions/ginx.SuccessResponse-internal_infra_http_controllers_users_UsersGetByResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный username",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ErrorResponse"
                         }
                     },
                     "404": {
@@ -260,7 +278,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Ошибка загрузки файла",
+                        "description": "Ошибка загрузки или открытия файла",
                         "schema": {
                             "$ref": "#/definitions/ginx.ErrorResponse"
                         }
@@ -491,12 +509,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Пользователь не найден",
-                        "schema": {
-                            "$ref": "#/definitions/ginx.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Ошибка бизнес-логики",
                         "schema": {
                             "$ref": "#/definitions/ginx.ErrorResponse"
                         }
